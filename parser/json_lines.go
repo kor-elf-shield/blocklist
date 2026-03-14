@@ -10,7 +10,9 @@ import (
 // jsonLinesExtract defines the function signature for extracting IP addresses from a JSON Lines item.
 type jsonLinesExtract func(item json.RawMessage) (string, error)
 
+// jsonLinesParser is a parser for JSON Lines data.
 type jsonLinesParser struct {
+	// extract is the function that extracts an IP address from a JSON Lines item.
 	extract jsonLinesExtract
 }
 
