@@ -7,12 +7,14 @@ import (
 	"strings"
 )
 
+// jsonLinesExtract defines the function signature for extracting IP addresses from a JSON Lines item.
 type jsonLinesExtract func(item json.RawMessage) (string, error)
 
 type jsonLinesParser struct {
 	extract jsonLinesExtract
 }
 
+// NewJsonLines creates a new JSON Lines parser.
 func NewJsonLines(extract jsonLinesExtract) (Parser, error) {
 	if extract == nil {
 		return nil, fmt.Errorf("json lines extract is nil")
@@ -23,6 +25,8 @@ func NewJsonLines(extract jsonLinesExtract) (Parser, error) {
 	}, nil
 }
 
+// Parse parses the JSON Lines data from the given reader.
+// It returns a slice of IP addresses and any errors that occurred during the process.
 func (p *jsonLinesParser) Parse(body io.Reader, validator IPValidator, limit uint) (IPs, error) {
 	decoder := json.NewDecoder(body)
 	ips := make(IPs, 0)
