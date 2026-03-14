@@ -1,0 +1,91 @@
+package parser
+
+import (
+	"bytes"
+	"io"
+	"net"
+	"strings"
+)
+
+// Parser interface defines the contract for parsing IP addresses from a given reader.
+type Parser interface {
+	// Parse reads the body and returns a slice of IP addresses.
+	Parse(body io.Reader, validator IPValidator, limit uint) (IPs, error)
+}
+
+// IPValidator interface defines the contract for validating IP addresses.
+type IPValidator interface {
+	// IsValid checks if the given IP address is valid.
+	IsValid(ip string) bool
+}
+
+// IPs is a slice of IP addresses.
+type IPs []string
+
+// DefaultIPValidator implements IPValidator interface.
+// It validates IP addresses by parsing them using net.ParseIP and net.ParseCIDR.
+type DefaultIPValidator struct{}
+
+// IsValid checks if the given IP address is valid.
+// It returns true if the IP address is not a loopback address.
+func (v *DefaultIPValidator) IsValid(value string) bool {
+	if value == "" {
+		return false
+	}
+
+	if ip := net.ParseIP(value); ip != nil {
+		if ip.IsLoopback() {
+			return false
+		}
+		return true
+	}
+
+	if ip, _, err := net.ParseCIDR(value); err == nil {
+		if ip.IsLoopback() {
+			return false
+		}
+		return true
+	}
+
+	return false
+}
+
+// IPRangeValidator implements IPValidator interface.
+// It validates IP ranges by parsing them using net.ParseIP and checking if the start and end IPs are in the same network.
+type IPRangeValidator struct{}
+
+// IsValid checks if the given IP range is valid.
+// It returns true if the start and end IPs are in the same network.
+func (v *IPRangeValidator) IsValid(value string) bool {
+	if value == "" {
+		return false
+	}
+
+	parts := strings.Split(value, "-")
+	if len(parts) != 2 {
+		return false
+	}
+
+	start := net.ParseIP(strings.TrimSpace(parts[0]))
+	end := net.ParseIP(strings.TrimSpace(parts[1]))
+	if start == nil || end == nil {
+		return false
+	}
+
+	start4 := start.To4()
+	end4 := end.To4()
+
+	switch {
+	case start4 != nil && end4 != nil:
+		return bytes.Compare(start4, end4) <= 0
+	case start4 == nil && end4 == nil:
+		start16 := start.To16()
+		end16 := end.To16()
+		if start16 == nil || end16 == nil {
+			return false
+		}
+		return bytes.Compare(start16, end16) <= 0
+	default:
+		return false
+	}
+}
