@@ -11,9 +11,9 @@ import (
 )
 
 const (
-
 	// contextTimeout defines the maximum duration for context operations before timing out.
 	contextTimeout = 15 * time.Second
+
 	// requestTimeout defines the maximum duration for request operations before timing out.
 	requestTimeout = 20 * time.Second
 )
