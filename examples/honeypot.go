@@ -10,7 +10,7 @@ import (
 )
 
 /**
- * An example of how to get a list of bad IP addresses from the service https://www.projecthoneypot.org/list_of_ips.php
+ * An example of how to get a list of IP addresses from a service https://www.projecthoneypot.org/list_of_ips.php
  */
 
 type rssItem struct {
