@@ -46,6 +46,8 @@ func NewConfig(limit uint) Config {
 }
 
 // NewConfigWithValidator creates a new Config with the specified validator.
+// limit is the maximum number of items to process or validate. 0 means no limit.
+// validator is the IP validator to use.
 func NewConfigWithValidator(limit uint, validator parser.IPValidator) Config {
 	return Config{
 		Limit:          limit,
