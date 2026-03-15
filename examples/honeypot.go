@@ -1,0 +1,53 @@
+package main
+
+import (
+	"encoding/xml"
+	"fmt"
+	"strings"
+
+	"git.kor-elf.net/kor-elf-shield/blocklist"
+	"git.kor-elf.net/kor-elf-shield/blocklist/parser"
+)
+
+/**
+ * An example of how to get a list of bad IP addresses from the service https://www.projecthoneypot.org/list_of_ips.php
+ */
+
+type rssItem struct {
+	Title string `xml:"title"`
+}
+
+func main() {
+	url := "https://www.projecthoneypot.org/list_of_ips.php?t=d&rss=1"
+	pars, err := parser.NewRss(func(decoder *xml.Decoder, start xml.StartElement) (string, error) {
+		if start.Name.Local != "item" {
+			return "", nil
+		}
+
+		var rssItem rssItem
+		if err := decoder.DecodeElement(&rssItem, &start); err != nil {
+			return "", fmt.Errorf("decode rss item: %w", err)
+		}
+
+		if rssItem.Title == "" {
+			return "", nil
+		}
+
+		fields := strings.Split(rssItem.Title, "|")
+		if len(fields) != 2 {
+			return "", nil
+		}
+		return strings.TrimSpace(fields[0]), nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	// limit 0 - no limit
+	limit := uint(0)
+	config := blocklist.NewConfig(limit)
+	ips, err := blocklist.Get(url, pars, config)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(ips)
+}
