@@ -15,6 +15,7 @@ go get git.kor-elf.net/kor-elf-shield/blocklist
 - [Пример получения списка IP адресов от CIARMY](/examples/ciarmy.go)
 - [Пример получения списка IP адресов от Daniel Gerzo (BruteforceBlocker)](/examples/bruteforceblocker.go)
 - [Пример получения списка IP адресов от Blocklist.de](/examples/blocklist.go)
+- [Пример получения списка IP адресов от GreenSnow](/examples/greensnow.go)
 
 ## Лицензия
 
