@@ -10,7 +10,7 @@ go get git.kor-elf.net/kor-elf-shield/blocklist
 ## Примеры использования
 - [Пример получения списка IP адресов от Spamhaus](/examples/spamhaus.go)
 - [Пример получения списка IP адресов от DShield](/examples/dshield.go)
-- [Пример получения списка IP адресов от honeypot](/examples/honeypot.go)
+- [Пример получения списка IP адресов от HONEYPOT](/examples/honeypot.go)
 - [Пример получения списка IP адресов от Tor](/examples/tor.go)
 
 ## Лицензия
