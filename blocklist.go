@@ -35,6 +35,7 @@ type Config struct {
 }
 
 // NewConfig creates a new Config with default values.
+// limit is the maximum number of items to process or validate. 0 means no limit.
 func NewConfig(limit uint) Config {
 	return Config{
 		Limit:          limit,
