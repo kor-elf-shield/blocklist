@@ -18,7 +18,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	config := blocklist.NewConfig(0)
+	// limit 0 - no limit
+	limit := uint(0)
+	config := blocklist.NewConfig(limit)
 	ips, err := blocklist.Get(url, pars, config)
 	if err != nil {
 		panic(err)
@@ -33,7 +35,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		config := blocklist.NewConfigWithValidator(0, &parser.IPRangeValidator{})
+		// limit 0 - no limit
+		limit := uint(0)
+		config := blocklist.NewConfigWithValidator(limit, &parser.IPRangeValidator{})
 		ips, err := blocklist.Get(url, pars, config)
 		if err != nil {
 			panic(err)
