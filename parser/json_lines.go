@@ -63,3 +63,50 @@ func (p *jsonLinesParser) Parse(body io.Reader, validator IPValidator, limit uin
 
 	return ips, nil
 }
+
+// ParseIPsByVersion parses the JSON Lines data from the given reader
+// and returns a slice of IP addresses for each IP version.
+// It also returns any errors that occurred during the process.
+func (p *jsonLinesParser) ParseIPsByVersion(body io.Reader, validator IPValidator, limit uint) (ipV4 IPs, ipV6 IPs, err error) {
+	decoder := json.NewDecoder(body)
+	ipV4 = make(IPs, 0)
+	ipV6 = make(IPs, 0)
+	for {
+		var item json.RawMessage
+		if err := decoder.Decode(&item); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, nil, fmt.Errorf("decode json item: %w", err)
+		}
+
+		if item == nil {
+			continue
+		}
+
+		ip, err := p.extract(item)
+		if err != nil {
+			return nil, nil, fmt.Errorf("extract ip: %w", err)
+		}
+
+		ip = strings.TrimSpace(ip)
+		isValid, ipVersion := validator.IsValidAndReturnVersion(ip)
+		if !isValid {
+			continue
+		}
+
+		if ipVersion == IPVersion4 {
+			ipV4 = append(ipV4, ip)
+		} else if ipVersion == IPVersion6 {
+			ipV6 = append(ipV6, ip)
+		} else {
+			continue
+		}
+
+		if limit > 0 && uint(len(ipV4))+uint(len(ipV6)) >= limit {
+			break
+		}
+	}
+
+	return ipV4, ipV6, nil
+}

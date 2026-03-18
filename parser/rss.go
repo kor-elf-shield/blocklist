@@ -66,3 +66,53 @@ func (p *rssParser) Parse(body io.Reader, validator IPValidator, limit uint) (IP
 
 	return ips, nil
 }
+
+// ParseIPsByVersion parses the RSS data from the given reader
+// and returns a slice of IP addresses for each IP version.
+// It also returns any errors that occurred during the process.
+func (p *rssParser) ParseIPsByVersion(body io.Reader, validator IPValidator, limit uint) (ipV4 IPs, ipV6 IPs, err error) {
+	decoder := xml.NewDecoder(body)
+	ipV4 = make(IPs, 0)
+	ipV6 = make(IPs, 0)
+
+	for {
+		token, err := decoder.Token()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+
+			return nil, nil, fmt.Errorf("parse rss: %w", err)
+		}
+
+		start, ok := token.(xml.StartElement)
+		if !ok {
+			continue
+		}
+
+		ip, err := p.extract(decoder, start)
+		if err != nil {
+			return nil, nil, fmt.Errorf("extract rss ip: %w", err)
+		}
+
+		ip = strings.TrimSpace(ip)
+		isValid, ipVersion := validator.IsValidAndReturnVersion(ip)
+		if !isValid {
+			continue
+		}
+
+		if ipVersion == IPVersion4 {
+			ipV4 = append(ipV4, ip)
+		} else if ipVersion == IPVersion6 {
+			ipV6 = append(ipV6, ip)
+		} else {
+			continue
+		}
+
+		if limit > 0 && uint(len(ipV4))+uint(len(ipV6)) >= limit {
+			break
+		}
+	}
+
+	return ipV4, ipV6, nil
+}

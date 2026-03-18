@@ -23,9 +23,21 @@ func main() {
 	limit := uint(0)
 	config := blocklist.NewConfig(limit)
 	configZip := blocklist.NewConfigZip(config)
+
+	// Get IPv4 and IPv6 addresses in one list
 	ips, err := blocklist.GetZip(url, pars, configZip)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(ips)
+
+	// Get IPv4 and IPv6 addresses in two lists
+	ipsV4, ipsV6, err := blocklist.GetZipSeparatedIPs(url, pars, configZip)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("IPv4")
+	fmt.Println(ipsV4)
+	fmt.Println("IPv6")
+	fmt.Println(ipsV6)
 }

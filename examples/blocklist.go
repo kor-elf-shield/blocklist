@@ -23,11 +23,23 @@ func main() {
 	// limit 0 - no limit
 	limit := uint(0)
 	config := blocklist.NewConfig(limit)
+
+	// Get IPv4 and IPv6 addresses in one list
 	ips, err := blocklist.Get(url, pars, config)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(ips)
+
+	// Get IPv4 and IPv6 addresses in two lists
+	ipsV4, ipsV6, err := blocklist.GetSeparatedIPs(url, pars, config)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("IPv4")
+	fmt.Println(ipsV4)
+	fmt.Println("IPv6")
+	fmt.Println(ipsV6)
 
 	/*
 		// This second list retrieves all the IP addresses added in the last 48 hours and is usually a
@@ -41,10 +53,22 @@ func main() {
 		// limit 0 - no limit
 		limit := uint(0)
 		config := blocklist.NewConfig(limit)
+
+		// Get IPv4 and IPv6 addresses in one list
 		ips, err := blocklist.Get(url, pars, config)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println(ips)
+
+		// Get IPv4 and IPv6 addresses in two lists
+		ipsV4, ipsV6, err := blocklist.GetSeparatedIPs(url, pars, config)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("IPv4")
+		fmt.Println(ipsV4)
+		fmt.Println("IPv6")
+		fmt.Println(ipsV6)
 	*/
 }
