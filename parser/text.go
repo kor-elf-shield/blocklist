@@ -158,3 +158,49 @@ func (p *textParser) Parse(body io.Reader, validator IPValidator, limit uint) (I
 
 	return ips, nil
 }
+
+func (p *textParser) ParseIPsByVersion(body io.Reader, validator IPValidator, limit uint) (ipV4 IPs, ipV6 IPs, err error) {
+	ipV4 = make(IPs, 0)
+	ipV6 = make(IPs, 0)
+
+	scanner := bufio.NewScanner(body)
+
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024)
+
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		ip, isFound := p.textExtract.Extract(line)
+		if !isFound {
+			continue
+		}
+
+		ip = strings.TrimSpace(ip)
+		isValid, ipVersion := validator.IsValidAndReturnVersion(ip)
+		if !isValid {
+			continue
+		}
+
+		if ipVersion == IPVersion4 {
+			ipV4 = append(ipV4, ip)
+		} else if ipVersion == IPVersion6 {
+			ipV6 = append(ipV6, ip)
+		} else {
+			continue
+		}
+
+		if limit > 0 && uint(len(ipV4))+uint(len(ipV6)) >= limit {
+			break
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, nil, fmt.Errorf("read response: %w", err)
+	}
+
+	return ipV4, ipV6, nil
+}
