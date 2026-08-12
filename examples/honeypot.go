@@ -46,6 +46,18 @@ func main() {
 	limit := uint(0)
 	config := blocklist.NewConfig(limit)
 
+	// If you need to exclude an IP address or subnet
+	//excludeIPs := []string{
+	//	"172.18.0.2",
+	//	//"172.18.0.0/24",
+	//	//"172.18.0.0-172.18.0.255",
+	//}
+	//exclusionChecker, err := parser.NewExclusionChecker(excludeIPs)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//config := blocklist.NewConfigWithExclusionChecker(limit, exclusionChecker)
+
 	// Get IPv4 and IPv6 addresses in one list
 	ips, err := blocklist.Get(url, pars, config)
 	if err != nil {
