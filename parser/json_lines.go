@@ -55,7 +55,10 @@ func (p *jsonLinesParser) Parse(body io.Reader, validator IPValidator, limit uin
 			continue
 		}
 
-		ips = append(ips, ip)
+		ips, err = appendIfNotExcluded(ip, ips, validator)
+		if err != nil {
+			return nil, err
+		}
 		if limit > 0 && uint(len(ips)) >= limit {
 			break
 		}
@@ -96,9 +99,15 @@ func (p *jsonLinesParser) ParseIPsByVersion(body io.Reader, validator IPValidato
 		}
 
 		if ipVersion == IPVersion4 {
-			ipV4 = append(ipV4, ip)
+			ipV4, err = appendIfNotExcluded(ip, ipV4, validator)
+			if err != nil {
+				return nil, nil, err
+			}
 		} else if ipVersion == IPVersion6 {
-			ipV6 = append(ipV6, ip)
+			ipV6, err = appendIfNotExcluded(ip, ipV6, validator)
+			if err != nil {
+				return nil, nil, err
+			}
 		} else {
 			continue
 		}
