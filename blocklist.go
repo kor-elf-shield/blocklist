@@ -66,6 +66,17 @@ func NewConfig(limit uint) Config {
 	}
 }
 
+func NewConfigWithExclusionChecker(limit uint, exclusionChecker parser.ExclusionChecker) Config {
+	return Config{
+		Limit: limit,
+		Validator: &parser.DefaultIPValidator{
+			ExclusionChecker: exclusionChecker,
+		},
+		ContextTimeout: contextTimeout,
+		RequestTimeout: requestTimeout,
+	}
+}
+
 // NewConfigWithValidator creates a new Config with the specified validator.
 // limit is the maximum number of items to process or validate. 0 means no limit.
 // validator is the IP validator to use.
