@@ -20,7 +20,11 @@ type IPValidator interface {
 	// IsValid checks if the given IP address is valid.
 	IsValid(ip string) bool
 
+	// IsValidAndReturnVersion validates the given IP address and returns whether it is valid and its version (IPv4 or IPv6).
 	IsValidAndReturnVersion(ip string) (bool, IPVersion)
+
+	// IsExcluded determines if the given IP address is excluded based on certain criteria and returns related IP addresses.
+	IsExcluded(ip string) (excluded bool, ips []string, err error)
 }
 
 type IPVersion int
@@ -35,7 +39,9 @@ type IPs []string
 
 // DefaultIPValidator implements IPValidator interface.
 // It validates IP addresses by parsing them using net.ParseIP and net.ParseCIDR.
-type DefaultIPValidator struct{}
+type DefaultIPValidator struct {
+	ExclusionChecker ExclusionChecker
+}
 
 // IsValid checks if the given IP address is valid.
 // It returns true if the IP address is not a loopback address.
@@ -103,9 +109,18 @@ func (v *DefaultIPValidator) IsValidAndReturnVersion(value string) (bool, IPVers
 	return false, IPVersion4
 }
 
+func (v *DefaultIPValidator) IsExcluded(ip string) (excluded bool, ips []string, err error) {
+	if v.ExclusionChecker == nil {
+		return false, nil, nil
+	}
+	return v.ExclusionChecker.IsExcluded(ip)
+}
+
 // IPRangeValidator implements IPValidator interface.
 // It validates IP ranges by parsing them using net.ParseIP and checking if the start and end IPs are in the same network.
-type IPRangeValidator struct{}
+type IPRangeValidator struct {
+	ExclusionChecker ExclusionChecker
+}
 
 // IsValid checks if the given IP range is valid.
 // It returns true if the start and end IPs are in the same network.
@@ -181,4 +196,11 @@ func (v *IPRangeValidator) IsValidAndReturnVersion(value string) (bool, IPVersio
 	default:
 		return false, IPVersion4
 	}
+}
+
+func (v *IPRangeValidator) IsExcluded(ip string) (excluded bool, ips []string, err error) {
+	if v.ExclusionChecker == nil {
+		return false, nil, nil
+	}
+	return v.ExclusionChecker.IsExcluded(ip)
 }
